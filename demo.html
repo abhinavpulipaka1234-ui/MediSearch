@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediSearch End-to-End Orchestration</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: white; overflow: hidden; }
+        .header { background: #1e293b; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+        .header h1 { margin: 0; font-size: 1.2rem; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status-indicators { display: flex; gap: 20px; }
+        .status { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #94a3b8; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .container { display: flex; height: calc(100vh - 60px); width: 100%; }
+        .pane-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .pane-label { background: #0f172a; padding: 8px 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between;}
+        iframe { flex: 1; border: none; width: 100%; height: 100%; background: #0f172a; }
+        .splitter { width: 4px; background: #334155; cursor: col-resize; z-index: 10; transition: background 0.2s; }
+        .splitter:hover { background: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MediSearch Dual-Portal Workspace</h1>
+        <div class="status-indicators">
+            <div class="status"><div class="dot"></div> PySpark ML</div>
+            <div class="status"><div class="dot"></div> Kafka Triage Stream</div>
+            <div class="status"><div class="dot"></div> FastAPI Core</div>
+        </div>
+    </div>
+    
+    <div class="container" id="container">
+        <div class="pane-wrapper" id="leftPane">
+            <div class="pane-label">
+                <span>Patient Portal (Port 3000)</span>
+                <span style="color:#3b82f6;">Input Flow</span>
+            </div>
+            <iframe src="http://localhost:3000/"></iframe>
+        </div>
+        
+        <div class="splitter" id="splitter"></div>
+        
+        <div class="pane-wrapper" id="rightPane">
+            <div class="pane-label">
+                <span>Doctor/Provider Portal (Port 3001)</span>
+                <span style="color:#8b5cf6;">Triage Queue</span>
+            </div>
+            <iframe src="http://localhost:3001/"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const splitter = document.getElementById('splitter');
+        const leftPane = document.getElementById('leftPane');
+        let isResizing = false;
+
+        splitter.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            
+            // Add a transparent overlay to frames to prevent them from capturing mouse events during drag
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(f => f.style.pointerEvents = 'none');
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            leftPane.style.flex = 'none';
+            leftPane.style.width = e.clientX + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+                const iframes = document.querySelectorAll('iframe');
+                iframes.forEach(f => f.style.pointerEvents = 'auto');
+            }
+        });
+    </script>
+</body>
+</html>

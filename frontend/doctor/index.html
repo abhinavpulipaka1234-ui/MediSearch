@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>doctor</title>
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        fetch('http://localhost:8000/client-error', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            message: String(message),
+            source: String(source),
+            lineno: Number(lineno),
+            colno: Number(colno),
+            error: error ? String(error.stack) : null
+          })
+        }).catch(err => console.error('Failed to log client error:', err));
+        return false;
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        fetch('http://localhost:8000/client-error', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            message: 'Unhandled Promise Rejection: ' + String(event.reason),
+            source: 'unhandledrejection',
+            lineno: 0,
+            colno: 0,
+            error: event.reason && event.reason.stack ? String(event.reason.stack) : null
+          })
+        }).catch(err => console.error('Failed to log client error:', err));
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
